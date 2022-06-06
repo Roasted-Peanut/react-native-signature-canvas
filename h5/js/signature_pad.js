@@ -203,15 +203,49 @@ export default `
           this.on();
       }
       SignaturePad.prototype.clear = function () {
-          var ctx = this._ctx;
-          var canvas = this.canvas;
-          ctx.fillStyle = this.backgroundColor;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          this._data = [];
-          this._reset();
-          this._isEmpty = true;
-      };
+            var ctx = this._ctx;
+            var canvas = this.canvas;
+
+        var painting = false;
+        var  lastX = 0;
+        var lastY = 0;
+            canvas.onmousedown = function (e) {
+                if (!painting) {
+                    painting = true;
+                } else {
+                    painting = false;
+                }
+                
+                lastX = e.pageX - this.offsetLeft;
+                lastY = e.pageY - this.offsetTop;
+            };
+
+            canvas.onmousemove = function (e) {
+                if (painting) {
+                    mouseX = e.pageX - this.offsetLeft;
+                    mouseY = e.pageY - this.offsetTop;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.stroke();
+                    
+                    lastX = mouseX;
+                    lastY = mouseY;
+                }
+            }
+
+            function fadeOut() {
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.fillRect(1, 0,canvas.width, canvas.height);
+                setTimeout(fadeOut,200);
+            }
+
+            setTimeout(fadeOut,2000);
+            this._data = [];
+            this._reset();
+            this._isEmpty = true;
+        };
       SignaturePad.prototype.undo = function () {
         const data = this.toData();
         if (data && data.length) {
