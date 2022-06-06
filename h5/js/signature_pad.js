@@ -183,8 +183,8 @@ export default `
               }
           };
           this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
-          this.minWidth = options.minWidth || 0.5;
-          this.maxWidth = options.maxWidth || 2.5;
+          this.minWidth = 5;
+          this.maxWidth = 5;
           this.throttle = "throttle" in options ? options.throttle : 16;
           this.minDistance = "minDistance" in options ? options.minDistance : 5;
           this._strokeMoveUpdate = this.throttle
@@ -203,12 +203,12 @@ export default `
           this.on();
       }
       SignaturePad.prototype.clear = function () {
-            var ctx = this._ctx;
-            var canvas = this.canvas;
+          var ctx = this._ctx;
+          var canvas = this.canvas;
 
-        var painting = false;
-        var  lastX = 0;
-        var lastY = 0;
+         var painting = false;
+         var  lastX = 0;
+         var lastY = 0;
             canvas.onmousedown = function (e) {
                 if (!painting) {
                     painting = true;
@@ -243,9 +243,9 @@ export default `
 
             setTimeout(fadeOut,2000);
             this._data = [];
-            this._reset();
-            this._isEmpty = true;
-        };
+          this._reset();
+          this._isEmpty = true;
+      };
       SignaturePad.prototype.undo = function () {
         const data = this.toData();
         if (data && data.length) {
