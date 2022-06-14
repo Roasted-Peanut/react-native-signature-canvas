@@ -28,6 +28,7 @@ export default `
     signaturePad = new SignaturePad(canvas, {
         onBegin: () => window.ReactNativeWebView.postMessage("BEGIN"),
         onEnd: () => window.ReactNativeWebView.postMessage("END"),
+        onDraw: (point) => window.ReactNativeWebView.postMessage(JSON.stringify(point)),      
         penColor: '<%penColor%>',
         backgroundColor: '<%backgroundColor%>',
         dotSize: <%dotSize%>,
@@ -177,6 +178,11 @@ export default `
             if (autoClear) signaturePad.clear();
         }
     }
+    function drawPoint(x, y)  {
+        if(signaturePad){
+            signaturePad.drawPoint(x,y)
+        }
+    }
 
     var autoClear = <%autoClear%>;
     
@@ -190,6 +196,6 @@ export default `
 
     saveButton.addEventListener("click", () => {    
       readSignature();
-      getData();    
+      getData();
     });
 `;

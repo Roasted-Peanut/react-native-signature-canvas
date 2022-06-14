@@ -1,26 +1,20 @@
 import React, { useState, useMemo, useRef, forwardRef, useImperativeHandle } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Platform, Dimensions } from "react-native";
 
 import htmlContent from "./h5/html";
 import injectedSignaturePad from "./h5/js/signature_pad";
 import injectedApplication from "./h5/js/app";
 
 import { WebView } from "react-native-webview";
-
 const styles = StyleSheet.create({
   webBg: {
-    width: "100%",
-    flex: 1,
+    flex:1,
+   top: 0, bottom: 0, left: 0, right: 0,
     position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    opacity: 0.3,
+    zIndex:999999,
   },
   loadingOverlayContainer: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, alignItems: "center", justifyContent: "center" },
 });
-
 const SignatureView = forwardRef(({
   androidHardwareAccelerationDisabled = false,
   autoClear = false,
@@ -101,6 +95,9 @@ const SignatureView = forwardRef(({
    }
 
   const getSignature = e => {
+    console.log('====================================');
+    console.log("GetSignature: ",e.nativeEvent.data);
+    console.log('====================================');
     switch (e.nativeEvent.data) {
       case "BEGIN":
         onBegin();
@@ -133,11 +130,19 @@ const SignatureView = forwardRef(({
         onChangePenSize();
         break;
       default:
-        isJson(e.nativeEvent.data)? onGetData(e.nativeEvent.data): onOK(e.nativeEvent.data);
+        console.log('====================================');
+        console.log("AAAAA", e.nativeEvent.data);
+        console.log('====================================');
+        isJson(e.nativeEvent.data)? onGetData(e.nativeEvent.data): onOK(e.nativeEvent.data); 
     }
   };
 
   useImperativeHandle(ref, () => ({
+    drawPoint: (x, y) => {
+      if (webViewRef.current) {
+        webViewRef.current.injectJavaScript(`drawPoint(${x},${y});true;`);
+      } 
+    },
     readSignature: () => {
       if (webViewRef.current) {
         webViewRef.current.injectJavaScript("readSignature();true;");
@@ -188,10 +193,10 @@ const SignatureView = forwardRef(({
   const renderError = ({nativeEvent}) => console.warn("WebView error: ", nativeEvent);
 
   return (
-    <View style={[styles.webBg, style]}>
+    <View style={[styles.webBg,  Platform.OS == 'ios' && {opacity: 0.3}]}>
       <WebView
         bounces={false}
-        style={[webviewContainerStyle]}
+        style={[ Platform.OS == 'android' && {opacity: 0.3}]}
         scrollEnabled={scrollable}
         androidHardwareAccelerationDisabled={androidHardwareAccelerationDisabled}
         ref={webViewRef}

@@ -197,10 +197,35 @@ export default `
           this.penColor = options.penColor || "black";
           this.backgroundColor = options.backgroundColor || "rgba(255,255,255,0)";
           this.onBegin = options.onBegin;
+          this.onDraw = options.onDraw;
           this.onEnd = options.onEnd;
           this._ctx = canvas.getContext("2d");
           this.clear();
           this.on();
+      }
+      SignaturePad.prototype.drawPoint = function (x,y) {
+        var point = this._createPoint(x, y);
+        var lastPointGroup = this._data[this._data.length - 1];
+        var lastPoints = lastPointGroup.points;
+        var lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
+        var isLastPointTooClose = lastPoint
+            ? point.distanceTo(lastPoint) <= this.minDistance
+            : false;
+        var color = lastPointGroup.color;
+        if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
+            var curve = this._addPoint(point);
+            if (!lastPoint) {
+                this._drawDot({ color, point });
+            }
+            else if (curve) {
+                this._drawCurve({ color, curve });
+            }
+            lastPoints.push({
+                time: point.time,
+                x: point.x,
+                y: point.y
+            });
+        }
       }
       SignaturePad.prototype.clear = function () {
           var ctx = this._ctx;
@@ -232,6 +257,7 @@ export default `
                     
                     lastX = mouseX;
                     lastY = mouseY;
+                    console.log("AAA", lastX, lastY)   
                 }
             }
 
@@ -241,7 +267,7 @@ export default `
                 setTimeout(fadeOut,200);
             }
 
-            setTimeout(fadeOut,2000);
+            setTimeout(fadeOut,200);
             this._data = [];
           this._reset();
           this._isEmpty = true;
@@ -393,6 +419,7 @@ export default `
                   y: point.y
               });
           }
+          this.onDraw(point)
       };
       SignaturePad.prototype._strokeEnd = function (event) {
           this._strokeUpdate(event);
