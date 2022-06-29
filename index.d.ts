@@ -9,6 +9,7 @@ declare module "react-native-signature-canvas" {
   type ForwardRef<T, P> = React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<T>>;
 
   type SignatureViewProps = {
+    handlePoint:string,
     androidHardwareAccelerationDisabled?: boolean;
     autoClear?: boolean;
     backgroundColor?: string;
