@@ -228,12 +228,14 @@ export default `
         }
       }
       SignaturePad.prototype.clear = function () {
-          var ctx = this._ctx;
-          var canvas = this.canvas;
-
-            this._data = [];
-          this._reset();
-          this._isEmpty = true;
+        var ctx = this._ctx;
+        var canvas = this.canvas;
+        ctx.fillStyle = this.backgroundColor;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this._data = [];
+        this._reset();
+        this._isEmpty = true;
       };
       SignaturePad.prototype.undo = function () {
         const data = this.toData();
@@ -382,13 +384,38 @@ export default `
                   y: point.y
               });
           }
-          this.onDraw(point)
+        //   this.onDraw(point)
       };
       SignaturePad.prototype._strokeEnd = function (event) {
           this._strokeUpdate(event);
           if (typeof this.onEnd === 'function') {
               this.onEnd(event);
           }
+          var x = event.clientX;
+          var y = event.clientY;
+          var point = this._createPoint(x, y);
+          var lastPointGroup = this._data[this._data.length - 1];
+          var lastPoints = lastPointGroup.points;
+          var lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
+          var isLastPointTooClose = lastPoint
+              ? point.distanceTo(lastPoint) <= this.minDistance
+              : false;
+          var color = lastPointGroup.color;
+          if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
+              var curve = this._addPoint(point);
+              if (!lastPoint) {
+                  this._drawDot({ color, point });
+              }
+              else if (curve) {
+                  this._drawCurve({ color, curve });
+              }
+              lastPoints.push({
+                  time: point.time,
+                  x: point.x,
+                  y: point.y
+              });
+          }
+          this.onDraw(lastPoints)
       };
       SignaturePad.prototype._handlePointerEvents = function () {
           this._mouseButtonDown = false;
